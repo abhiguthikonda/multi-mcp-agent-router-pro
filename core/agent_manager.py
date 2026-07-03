@@ -5,6 +5,7 @@ from routers.keyword_router import KeywordRouter
 
 from providers.factory import get_provider
 from services.activity_tracker import ActivityTracker
+from services.memory import MemoryManager
 from services.logger import logger
 
 
@@ -16,6 +17,7 @@ class AgentManager:
     def __init__(self):
         self.activity = ActivityTracker()
         self.router = KeywordRouter()
+        self.memory = MemoryManager()
 
     async def chat(self, request: ChatRequest) -> ChatResponse:
         """
@@ -45,6 +47,18 @@ class AgentManager:
         self.activity.add(
             "Agent Selected",
             agent.name,
+        )
+
+        self.memory.add_message(
+            agent.id,
+            "user",
+            request.message,
+        )
+
+        self.memory.add_message(
+            agent.id,
+            "assistant",
+            "This is a placeholder response from AgentManager.",
         )
 
         provider = get_provider(request.provider)

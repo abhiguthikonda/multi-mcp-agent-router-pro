@@ -23,5 +23,12 @@ async def main():
 
     print("Response :", response.response)
 
+    print()
+
+    print("Conversation History")
+
+    for message in manager.memory.get_history(response.agent_id):
+        print(message)
+
 
 asyncio.run(main())
