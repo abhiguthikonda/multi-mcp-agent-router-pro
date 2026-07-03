@@ -6,32 +6,44 @@ from providers.base import BaseLLMProvider
 
 class OpenRouterProvider(BaseLLMProvider):
     """
-    OpenRouter implementation.
-
-    OpenRouter exposes an OpenAI-compatible API, so we use the official
-    OpenAI SDK with a custom base_url.
+    OpenRouter implementation using lazy initialization.
     """
 
     def __init__(self):
-        self.client = AsyncOpenAI(
-            api_key=settings.OPENROUTER_API_KEY,
-            base_url="https://openrouter.ai/api/v1",
-        )
+        self.client = None
 
     @property
-    def provider_name(self) -> str:
+    def provider_name(self):
         return "OpenRouter"
+
+    def _get_client(self):
+        """
+        Create the OpenAI client only when needed.
+        """
+
+        if self.client is None:
+
+            if not settings.OPENROUTER_API_KEY:
+                raise ValueError(
+                    "OPENROUTER_API_KEY is not configured."
+                )
+
+            self.client = AsyncOpenAI(
+                api_key=settings.OPENROUTER_API_KEY,
+                base_url="https://openrouter.ai/api/v1",
+            )
+
+        return self.client
 
     async def generate(
         self,
-        system_prompt: str,
-        messages: list,
-        tools: list | None = None,
-        model: str = "deepseek/deepseek-r1-0528:free",
+        system_prompt,
+        messages,
+        tools=None,
+        model="deepseek/deepseek-r1-0528:free",
     ):
-        """
-        Generate a chat completion.
-        """
+
+        client = self._get_client()
 
         request_messages = [
             {
@@ -41,7 +53,7 @@ class OpenRouterProvider(BaseLLMProvider):
             *messages,
         ]
 
-        response = await self.client.chat.completions.create(
+        response = await client.chat.completions.create(
             model=model,
             messages=request_messages,
             tools=tools,
