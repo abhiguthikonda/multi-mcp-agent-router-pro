@@ -27,7 +27,7 @@ class OpenRouterProvider(BaseLLMProvider):
                 raise ValueError(
                     "OPENROUTER_API_KEY is not configured."
                 )
-
+            print("OpenRouter client initialized.")
             self.client = AsyncOpenAI(
                 api_key=settings.OPENROUTER_API_KEY,
                 base_url="https://openrouter.ai/api/v1",
@@ -36,20 +36,19 @@ class OpenRouterProvider(BaseLLMProvider):
         return self.client
 
     async def generate(
-        self,
-        system_prompt,
-        messages,
-        tools=None,
-        model="deepseek/deepseek-r1-0528:free",
-    ):
+    self,
+    system_prompt,
+    messages,
+    tools=None,
+    model=None,
+):
+        """Generate a chat completion via OpenRouter/OpenAI AsyncOpenAI client."""
 
         client = self._get_client()
+        model = model or settings.DEFAULT_MODEL
 
         request_messages = [
-            {
-                "role": "system",
-                "content": system_prompt,
-            },
+            {"role": "system", "content": system_prompt},
             *messages,
         ]
 
@@ -57,6 +56,25 @@ class OpenRouterProvider(BaseLLMProvider):
             model=model,
             messages=request_messages,
             tools=tools,
+            max_tokens=settings.max_tokens,
         )
 
         return response
+
+    async def generate_with_tools(
+        self,
+        system_prompt,
+        messages,
+        tools,
+        tool_executor,
+        model="deepseek/deepseek-r1-0528:free",
+    ):
+        """Placeholder implementation. Tool-calling loop will be implemented next."""
+
+        # For now delegate to generate; tool_executor is unused.
+        return await self.generate(
+            system_prompt=system_prompt,
+            messages=messages,
+            tools=tools,
+            model=model,
+        )

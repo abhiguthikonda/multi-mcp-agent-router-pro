@@ -51,14 +51,8 @@ class AgentManager:
 
         self.memory.add_message(
             agent.id,
-            "user",
-            request.message,
-        )
-
-        self.memory.add_message(
-            agent.id,
             "assistant",
-            "This is a placeholder response from AgentManager.",
+            assistant_message,
         )
 
         provider = get_provider(request.provider)
@@ -70,9 +64,27 @@ class AgentManager:
                provider.provider_name,
         )
 
+        response = await provider.generate(
+            system_prompt=agent.system_prompt,
+            messages=[
+                {
+                    "role": "user",
+                    "content": request.message,
+                }
+            ],
+        )
+
+        assistant_message = response.choices[0].message.content
+
+        self.memory.add_message(
+            agent.id,
+            "assistant",
+            assistant_message,
+        )
+
         return ChatResponse(
             agent_id=context.selected_agent,
             agent_name=agent.name,
             provider=provider.provider_name,
-            response="This is a placeholder response from AgentManager.",
+            response=assistant_message,
         )

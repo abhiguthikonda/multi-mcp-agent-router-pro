@@ -13,14 +13,16 @@ class Settings(BaseSettings):
     APP_NAME: str = "Multi MCP Agent Router Pro"
     VERSION: str = "1.0.0"
 
-    # =========================
-    # LLM Providers
-    # =========================
+# =========================
+# LLM Providers
+# =========================
     OPENROUTER_API_KEY: str = ""
     GEMINI_API_KEY: str = ""
     ANTHROPIC_API_KEY: str = ""
 
     DEFAULT_PROVIDER: str = "openrouter"
+    DEFAULT_MODEL: str = "deepseek/deepseek-r1-0528"
+    max_tokens: int = 1024
 
     # =========================
     # Workspace

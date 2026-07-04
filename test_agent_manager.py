@@ -10,7 +10,7 @@ async def main():
 
     response = await manager.chat(
         ChatRequest(
-            message="Explain Python decorators.",
+            message="Explain Python decorators with an example.",
             provider="openrouter",
         )
     )

@@ -3,16 +3,12 @@ from abc import ABC, abstractmethod
 
 class BaseLLMProvider(ABC):
     """
-    Base class for all LLM providers.
-
-    Every provider (OpenRouter, Gemini, Ollama, Anthropic)
-    must implement this interface.
+    Base interface for every LLM provider.
     """
 
     @property
     @abstractmethod
     def provider_name(self) -> str:
-        """Return provider name."""
         pass
 
     @abstractmethod
@@ -21,8 +17,23 @@ class BaseLLMProvider(ABC):
         system_prompt: str,
         messages: list,
         tools: list | None = None,
+        model: str | None = None,
     ):
         """
-        Generate a response from the model.
+        Generate a normal response.
+        """
+        pass
+
+    @abstractmethod
+    async def generate_with_tools(
+        self,
+        system_prompt: str,
+        messages: list,
+        tools: list,
+        tool_executor,
+        model: str | None = None,
+    ):
+        """
+        Generate a response with automatic tool execution.
         """
         pass
