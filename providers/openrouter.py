@@ -27,7 +27,7 @@ class OpenRouterProvider(BaseLLMProvider):
                 raise ValueError(
                     "OPENROUTER_API_KEY is not configured."
                 )
-            print("OpenRouter client initialized.")
+            
             self.client = AsyncOpenAI(
                 api_key=settings.OPENROUTER_API_KEY,
                 base_url="https://openrouter.ai/api/v1",
@@ -36,12 +36,12 @@ class OpenRouterProvider(BaseLLMProvider):
         return self.client
 
     async def generate(
-    self,
-    system_prompt,
-    messages,
-    tools=None,
-    model=None,
-):
+        self,
+        system_prompt,
+        messages,
+        tools=None,
+        model=None,
+    ):
         """Generate a chat completion via OpenRouter/OpenAI AsyncOpenAI client."""
 
         client = self._get_client()
@@ -67,14 +67,50 @@ class OpenRouterProvider(BaseLLMProvider):
         messages,
         tools,
         tool_executor,
-        model="deepseek/deepseek-r1-0528:free",
+        model=None,
     ):
-        """Placeholder implementation. Tool-calling loop will be implemented next."""
+        """
+        Generate a response with OpenAI tool calling.
+        """
 
-        # For now delegate to generate; tool_executor is unused.
-        return await self.generate(
-            system_prompt=system_prompt,
-            messages=messages,
-            tools=tools,
+        client = self._get_client()
+
+        model = model or settings.DEFAULT_MODEL
+
+        request_messages = [
+            {
+                "role": "system",
+                "content": system_prompt,
+            },
+            *messages,
+        ]
+
+        response = await client.chat.completions.create(
             model=model,
+            messages=request_messages,
+            tools=tools,
+            max_tokens=settings.max_tokens,
         )
+
+        message = response.choices[0].message
+
+        if not message.tool_calls:
+            return response
+
+        request_messages.append(message)
+
+        for tool_call in message.tool_calls:
+            tool_result = await tool_executor.execute_tool_call(
+                tool_call
+            )
+
+            request_messages.append(tool_result)
+
+        final_response = await client.chat.completions.create(
+            model=model,
+            messages=request_messages,
+            tools=tools,
+            max_tokens=settings.max_tokens,
+        )
+
+        return final_response

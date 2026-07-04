@@ -10,15 +10,17 @@ class MCPManager:
     """
 
     def __init__(self):
-        self.stack = AsyncExitStack()
-        self.sessions = {}
-        self.connected_servers = {}
+        self.stack = None
+        self.session = None
         self.connected = False
 
     async def connect_filesystem(self, directory="."):
         """
         Connect to the Filesystem MCP server.
         """
+
+        # Always create a fresh AsyncExitStack
+        self.stack = AsyncExitStack()
 
         await self.stack.__aenter__()
 
@@ -31,7 +33,9 @@ class MCPManager:
             ],
         )
 
-        transport = await self.stack.enter_async_context(stdio_client(params))
+        transport = await self.stack.enter_async_context(
+            stdio_client(params)
+        )
 
         read_stream, write_stream = transport
 
@@ -43,43 +47,48 @@ class MCPManager:
 
         self.connected = True
 
+    async def disconnect(self):
+        """
+        Disconnect from the MCP server.
+        """
+
+        if self.stack is not None:
+
+            await self.stack.aclose()
+
+            self.stack = None
+            self.session = None
+            self.connected = False
+
     async def list_tools(self):
+
         if not self.connected:
             raise RuntimeError(
-                "Not connected to an MCP server."
+                "No MCP server connected."
             )
 
         result = await self.session.list_tools()
 
         return result.tools
-    
-    async def disconnect(self):
-        """
-        Disconnect from the MCP server and clean up resources.
-        """
-        if self.connected:
-            await self.stack.aclose()
-            self.connected = False
 
     async def call_tool(
-    self,
-    tool_name,
-    arguments,
-):
-        """
-        Execute a tool through the active MCP session.
-        """
+        self,
+        tool_name,
+        arguments,
+    ):
 
         if not self.connected:
             raise RuntimeError(
-            "    No MCP server connected."
+                "No MCP server connected."
             )
 
         return await self.session.call_tool(
             tool_name,
             arguments,
         )
+
     async def get_openai_tools(self):
+
         from services.tool_schema import mcp_tool_to_openai
 
         tools = await self.list_tools()
