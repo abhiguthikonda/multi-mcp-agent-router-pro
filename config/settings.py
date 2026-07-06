@@ -54,9 +54,16 @@ class Settings(BaseSettings):
     )
 
 
+import os
+
+print("=" * 60)
+print("ENV OPENROUTER =", os.getenv("OPENROUTER_API_KEY"))
+print("ENV GITHUB =", os.getenv("GITHUB_TOKEN"))
+print("=" * 60)
+
 settings = Settings()
 
-print("=" * 50)
-print("OPENROUTER:", settings.OPENROUTER_API_KEY[:10] if settings.OPENROUTER_API_KEY else "NOT FOUND")
-print("GITHUB:", settings.GITHUB_TOKEN[:10] if settings.GITHUB_TOKEN else "NOT FOUND")
-print("=" * 50)
+print("=" * 60)
+print("Settings OPENROUTER =", settings.OPENROUTER_API_KEY)
+print("Settings GITHUB =", settings.GITHUB_TOKEN)
+print("=" * 60)
