@@ -5,10 +5,9 @@ from services.tool_executor import ToolExecutor
 
 
 async def main():
-
     manager = MCPManager()
 
-    await manager.connect_filesystem()
+    await manager.connect_all()
 
     executor = ToolExecutor(manager)
 

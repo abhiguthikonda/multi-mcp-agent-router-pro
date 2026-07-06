@@ -1,33 +1,25 @@
 from datetime import datetime
 
-from core.events import ActivityEvent, EventType
-
 
 class ActivityTracker:
     """
-    Tracks everything the agent is doing.
+    Tracks execution activities during a request.
     """
 
     def __init__(self):
-        self.events: list[ActivityEvent] = []
-
-    def add(
-        self,
-        title: str,
-        description: str,
-        event_type: EventType = EventType.INFO,
-    ):
-        self.events.append(
-            ActivityEvent(
-                timestamp=datetime.now(),
-                title=title,
-                description=description,
-                event_type=event_type,
-            )
-        )
+        self.activities = []
 
     def clear(self):
-        self.events.clear()
+        self.activities.clear()
 
-    def get_events(self):
-        return self.events
+    def add(self, title, description=""):
+        self.activities.append(
+            {
+                "time": datetime.now().strftime("%H:%M:%S"),
+                "title": title,
+                "description": description,
+            }
+        )
+
+    def get_all(self):
+        return self.activities

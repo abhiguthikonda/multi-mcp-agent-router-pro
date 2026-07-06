@@ -5,50 +5,13 @@ def render_message(role, content, agent="Assistant"):
 
     if role == "user":
 
-        st.markdown(
-            f"""
-<div class="user-row">
-
-<div>
-
-<div class="user-name">
-👤 You
-</div>
-
-<div class="user-bubble">
-
-{content}
-
-</div>
-
-</div>
-
-</div>
-""",
-            unsafe_allow_html=True,
-        )
+        with st.chat_message("user"):
+            st.markdown(content)
 
     else:
 
-        st.markdown(
-            f"""
-<div class="assistant-row">
+        with st.chat_message("assistant"):
 
-<div>
+            st.markdown(f"### 🤖 {agent}")
 
-<div class="agent-name">
-🤖 {agent}
-</div>
-
-<div class="assistant-bubble">
-
-{content}
-
-</div>
-
-</div>
-
-</div>
-""",
-            unsafe_allow_html=True,
-        )
+            st.markdown(content)

@@ -17,8 +17,10 @@ class Settings(BaseSettings):
 # LLM Providers
 # =========================
     OPENROUTER_API_KEY: str = ""
-    GEMINI_API_KEY: str = ""
+
+
     ANTHROPIC_API_KEY: str = ""
+    GITHUB_TOKEN: str = ""
 
     DEFAULT_PROVIDER: str = "openrouter"
     DEFAULT_MODEL: str = "deepseek/deepseek-r1-0528"

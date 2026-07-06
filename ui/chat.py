@@ -11,9 +11,11 @@ def render_chat():
     for message in st.session_state.messages:
 
         render_message(
-            message["role"],
-            message["content"],
-            message.get("agent", "Assistant"),
+            role=message["role"],
+            content=message["content"],
+            agent=message.get("agent", "Assistant"),
         )
 
-    return st.chat_input("Ask anything...")
+    return st.chat_input(
+        "Ask anything..."
+    )

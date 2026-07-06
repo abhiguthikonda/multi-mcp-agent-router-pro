@@ -7,29 +7,23 @@ async def main():
 
     manager = MCPManager()
 
-    print("Connecting...")
+    print("Connecting to GitHub MCP...")
 
-    await manager.connect_all()
+    await manager.connect_github()
 
     print("Connected!")
 
-    tools = await manager.list_tools()
+    session = manager.sessions["github"]
 
-    print()
+    result = await session.list_tools()
 
-    print("Available Tools")
-
+    print("\nAvailable GitHub Tools")
     print("-" * 40)
 
-    for tool in tools:
-
+    for tool in result.tools:
         print(tool.name)
 
     await manager.disconnect()
-
-    print()
-
-    print("Disconnected!")
 
 
 asyncio.run(main())
