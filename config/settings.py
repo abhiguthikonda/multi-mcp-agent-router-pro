@@ -55,3 +55,8 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+print("=" * 50)
+print("OPENROUTER:", settings.OPENROUTER_API_KEY[:10] if settings.OPENROUTER_API_KEY else "NOT FOUND")
+print("GITHUB:", settings.GITHUB_TOKEN[:10] if settings.GITHUB_TOKEN else "NOT FOUND")
+print("=" * 50)
