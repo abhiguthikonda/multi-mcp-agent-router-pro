@@ -60,7 +60,7 @@ class OpenRouterProvider(BaseLLMProvider):
             model=model,
             messages=request_messages,
             tools=tools,
-            max_tokens=settings.max_tokens,
+            max_tokens=settings.MAX_TOKENS,
         )
 
         return response
@@ -93,7 +93,7 @@ class OpenRouterProvider(BaseLLMProvider):
             model=model,
             messages=request_messages,
             tools=tools,
-            max_tokens=settings.max_tokens,
+            max_tokens=settings.MAX_TOKENS,
         )
 
         message = response.choices[0].message
@@ -114,7 +114,7 @@ class OpenRouterProvider(BaseLLMProvider):
             model=model,
             messages=request_messages,
             tools=tools,
-            max_tokens=settings.max_tokens,
+            max_tokens=settings.MAX_TOKENS,
         )
 
         return final_response
