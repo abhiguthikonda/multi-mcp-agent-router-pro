@@ -56,19 +56,16 @@ class Settings(BaseSettings):
 
 import os
 
+settings = Settings()
+
 print("=" * 80)
 print("STARTUP DEBUG")
 print("PORT =", os.getenv("PORT"))
 print("OPENROUTER_API_KEY exists =", bool(os.getenv("OPENROUTER_API_KEY")))
 print("GITHUB_TOKEN exists =", bool(os.getenv("GITHUB_TOKEN")))
-print("=" * 80)
-
-settings = Settings()
-
-print("=" * 80)
-print("Settings Loaded")
 print("Provider =", settings.DEFAULT_PROVIDER)
 print("Model =", settings.DEFAULT_MODEL)
+print("MAX_TOKENS =", settings.MAX_TOKENS)
 print("OpenRouter Loaded =", bool(settings.OPENROUTER_API_KEY))
 print("Github Loaded =", bool(settings.GITHUB_TOKEN))
 print("=" * 80)
