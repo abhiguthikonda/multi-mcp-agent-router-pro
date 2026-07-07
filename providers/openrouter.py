@@ -44,6 +44,10 @@ class OpenRouterProvider(BaseLLMProvider):
     ):
         """Generate a chat completion via OpenRouter/OpenAI AsyncOpenAI client."""
 
+        print("Generating response...")
+        print("Provider:", self.provider_name)
+        print("API Key Exists:", bool(settings.OPENROUTER_API_KEY))
+        
         client = self._get_client()
         model = model or settings.DEFAULT_MODEL
 

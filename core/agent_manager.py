@@ -1,3 +1,4 @@
+from asyncio import tools
 from services.mcp_manager import MCPManager
 from services.tool_executor import ToolExecutor
 
@@ -114,6 +115,10 @@ class AgentManager:
                 "LLM Thinking",
                 provider.provider_name,
 )
+            print("Calling OpenRouter...")
+            print("Tools:", len(tools))
+            print("Messages:", len(self.memory.get_history(agent.id)))
+            
             response = await provider.generate_with_tools(
                 system_prompt=agent.system_prompt,
                 messages=self.memory.get_history(

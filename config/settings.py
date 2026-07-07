@@ -24,7 +24,7 @@ class Settings(BaseSettings):
 
     DEFAULT_PROVIDER: str = "openrouter"
     DEFAULT_MODEL: str = "deepseek/deepseek-r1-0528"
-    max_tokens: int = 1024
+    MAX_TOKENS: int = 1024
 
     # =========================
     # Workspace
@@ -56,14 +56,19 @@ class Settings(BaseSettings):
 
 import os
 
-print("=" * 60)
-print("ENV OPENROUTER =", os.getenv("OPENROUTER_API_KEY"))
-print("ENV GITHUB =", os.getenv("GITHUB_TOKEN"))
-print("=" * 60)
+print("=" * 80)
+print("STARTUP DEBUG")
+print("PORT =", os.getenv("PORT"))
+print("OPENROUTER_API_KEY exists =", bool(os.getenv("OPENROUTER_API_KEY")))
+print("GITHUB_TOKEN exists =", bool(os.getenv("GITHUB_TOKEN")))
+print("=" * 80)
 
 settings = Settings()
 
-print("=" * 60)
-print("Settings OPENROUTER =", settings.OPENROUTER_API_KEY)
-print("Settings GITHUB =", settings.GITHUB_TOKEN)
-print("=" * 60)
+print("=" * 80)
+print("Settings Loaded")
+print("Provider =", settings.DEFAULT_PROVIDER)
+print("Model =", settings.DEFAULT_MODEL)
+print("OpenRouter Loaded =", bool(settings.OPENROUTER_API_KEY))
+print("Github Loaded =", bool(settings.GITHUB_TOKEN))
+print("=" * 80)
