@@ -1,4 +1,9 @@
-from openai import AsyncOpenAI
+from openai import (
+    AsyncOpenAI,
+    APIStatusError,
+    APITimeoutError,
+    APIConnectionError,
+)
 
 from config.settings import settings
 from providers.base import BaseLLMProvider
@@ -15,6 +20,36 @@ class OpenRouterProvider(BaseLLMProvider):
     @property
     def provider_name(self):
         return "OpenRouter"
+
+    def _format_error(self, error: Exception):
+        if isinstance(error, APIStatusError):
+            if error.status_code == 402:
+                return RuntimeError(
+                    "⚠️ Prompt too large or OpenRouter credits exhausted. "
+                    "Clear the chat or reduce the document size."
+                )
+
+            if error.status_code == 429:
+                return RuntimeError(
+                    "⚠️ Rate limit reached. Please wait a few seconds."
+                )
+
+            if error.status_code >= 500:
+                return RuntimeError(
+                    "⚠️ OpenRouter server error. Try again later."
+                )
+
+        if isinstance(error, APITimeoutError):
+            return RuntimeError(
+                "⚠️ Request timed out."
+            )
+
+        if isinstance(error, APIConnectionError):
+            return RuntimeError(
+                "⚠️ Unable to connect to OpenRouter."
+            )
+
+        return RuntimeError(str(error))
 
     def _get_client(self):
         """
@@ -53,13 +88,16 @@ class OpenRouterProvider(BaseLLMProvider):
             *messages,
         ]
 
-        response = await client.chat.completions.create(
-            model=model,
-            messages=request_messages,
-            tools=tools,
-            max_tokens=settings.MAX_TOKENS,
-            temperature=0.2,
-        )
+        try:
+            response = await client.chat.completions.create(
+                model=model,
+                messages=request_messages,
+                tools=tools,
+                max_tokens=settings.MAX_TOKENS,
+                temperature=0.2,
+            )
+        except Exception as e:
+            raise self._format_error(e)
 
         return response
 
@@ -109,12 +147,15 @@ class OpenRouterProvider(BaseLLMProvider):
 
             request_messages.append(tool_result)
 
-        final_response = await client.chat.completions.create(
-            model=model,
-            messages=request_messages,
-            tools=tools,
-            temperature=0.2,
-            max_tokens=settings.MAX_TOKENS,
-        )
+        try:
+            response = await client.chat.completions.create(
+                model=model,
+                messages=request_messages,
+                tools=tools,
+                max_tokens=settings.MAX_TOKENS,
+                temperature=0.2,
+            )
+        except Exception as e:
+            raise self._format_error(e)
 
-        return final_response
+        return response

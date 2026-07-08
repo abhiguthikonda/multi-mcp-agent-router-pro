@@ -13,7 +13,8 @@ from providers.factory import get_provider
 from services.activity_tracker import ActivityTracker
 from services.memory import MemoryManager
 from services.logger import logger
-
+from services.token_manager import TokenManager
+from ui.upload import render_upload
 
 class AgentManager:
     """
@@ -146,12 +147,12 @@ class AgentManager:
             
             response = await provider.generate_with_tools(
                 system_prompt=agent.system_prompt,
-                messages=self.memory.get_history(
-                    agent.id
-                ),
-                tools=tools,
-                tool_executor=self.tool_executor,
-            )
+                messages=TokenManager.trim_messages(
+                self.memory.get_history(agent.id)
+            ),
+            tools=tools,
+            tool_executor=self.tool_executor,
+        )
 
             assistant_message = (
                 response.choices[0]

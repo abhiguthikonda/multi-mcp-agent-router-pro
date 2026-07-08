@@ -113,32 +113,37 @@ if prompt:
 #temporarily added to show the context length for debugging purposes
     st.write("Document Context Length:", len(context))
 
-    chat_response = asyncio.run(
-        manager.chat(
-            ChatRequest(
-                message=prompt,
-                provider=settings["provider"].lower(),
-                auto_route=settings["auto_route"],
-                selected_agent=settings["agent"],
-                uploaded_context=context,
+    try:
+        chat_response = asyncio.run(
+            manager.chat(
+                ChatRequest(
+                    message=prompt,
+                    provider=settings["provider"].lower(),
+                    auto_route=settings["auto_route"],
+                    selected_agent=settings["agent"],
+                    uploaded_context=context,
+                )
             )
         )
-    )
 
-    st.session_state.messages.append(
-        {
-            "role": "user",
-            "content": prompt,
-        }
-    )
+        st.session_state.messages.append(
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        )
 
-    st.session_state.messages.append(
-        {
-            "role": "assistant",
-            "content": chat_response.response,
-            "agent": chat_response.agent_name,
-        }
-    )
+        st.session_state.messages.append(
+            {
+                "role": "assistant",
+                "content": chat_response.response,
+                "agent": chat_response.agent_name,
+            }
+        )
+
+    except Exception as e:
+        st.error(str(e))
+        st.stop()
 
     st.rerun()
 
