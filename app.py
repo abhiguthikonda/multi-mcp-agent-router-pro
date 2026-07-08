@@ -2,14 +2,18 @@ import asyncio
 
 import streamlit as st
 
-from ui.sidebar import render_sidebar
-from ui.chat import render_chat
-from ui.activity import render_activity
-from ui.styles import load_styles
-from ui.tool_history import render_tool_history
 from core.agent_manager import AgentManager
 from core.models import ChatRequest
 
+from services.document_manager import DocumentManager
+
+from ui.activity import render_activity
+from ui.chat import render_chat
+from ui.sidebar import render_sidebar
+from ui.styles import load_styles
+from ui.tool_history import render_tool_history
+from ui.upload import render_upload
+from ui.workspace import render_workspace
 
 # -----------------------------
 # Page Configuration
@@ -22,12 +26,20 @@ st.set_page_config(
 
 load_styles()
 
-
 # -----------------------------
 # Session State Initialization
 # -----------------------------
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
+if "documents" not in st.session_state:
+    st.session_state.documents = DocumentManager()
+
+if "uploaded_files" not in st.session_state:
+    st.session_state.uploaded_files = []
+
+if "urls" not in st.session_state:
+    st.session_state.urls = []
 
 if "manager" not in st.session_state:
     st.session_state.manager = AgentManager()
@@ -48,9 +60,8 @@ settings = render_sidebar()
 st.title("🤖 Multi MCP Agent Router Pro")
 
 st.caption(
-    "Production-ready Multi-Agent AI using MCP"
+    "Multi-Agent AI Workspace powered by OpenRouter and MCP"
 )
-
 
 # -----------------------------
 # Dashboard Metrics
@@ -66,23 +77,23 @@ with col1:
 with col2:
     st.metric(
         "Messages",
-        len(st.session_state.get("messages", [])),
+        len(st.session_state.messages),
     )
 
+st.divider()
+
+render_upload()
 
 st.divider()
-with st.expander("🛠 Tool Execution", expanded=True):
-    render_tool_history(manager.tool_executor)
-
 
 # -----------------------------
 # Activity Timeline
 # -----------------------------
-with st.expander("⚡ Activity Timeline", expanded=True):
-    render_activity(manager.activity)
-
+with st.expander("🛠 Tool Execution", expanded=True):
+    render_tool_history(manager.tool_executor)
 
 st.divider()
+
 
 
 # -----------------------------
@@ -90,12 +101,17 @@ st.divider()
 # -----------------------------
 prompt = render_chat()
 
-
 # -----------------------------
 # Handle Prompt
 # -----------------------------
 if prompt:
+
     manager.tool_executor.clear_history()
+
+    context = st.session_state.documents.build_context()
+
+#temporarily added to show the context length for debugging purposes
+    st.write("Document Context Length:", len(context))
 
     chat_response = asyncio.run(
         manager.chat(
@@ -104,6 +120,7 @@ if prompt:
                 provider=settings["provider"].lower(),
                 auto_route=settings["auto_route"],
                 selected_agent=settings["agent"],
+                uploaded_context=context,
             )
         )
     )
@@ -124,3 +141,7 @@ if prompt:
     )
 
     st.rerun()
+
+st.divider()
+
+render_workspace()

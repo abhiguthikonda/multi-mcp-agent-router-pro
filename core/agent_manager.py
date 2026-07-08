@@ -30,9 +30,12 @@ class AgentManager:
 
         self.mcp = MCPManager()
 
+        # Keep MCP connected after first request
+        self.connected = False
+
         self.tool_executor = ToolExecutor(
-            self.mcp
-        )
+        self.mcp
+    )
 
     async def chat(
         self,
@@ -83,7 +86,12 @@ class AgentManager:
         )
 
         # Connect every MCP server
-        await self.mcp.connect_all()
+        if not self.connected:
+
+            await self.mcp.connect_all()
+
+            self.connected = True
+
         self.activity.add(
             "Connected MCP Servers",
             ", ".join(self.mcp.sessions.keys()),
@@ -104,7 +112,25 @@ class AgentManager:
                 provider.provider_name,
             )
 
-            tools = await self.mcp.get_openai_tools()
+            tool_keywords = [
+                "github",
+                "repo",
+                "repository",
+                "project",
+                "file",
+                "folder",
+                "directory",
+                "workspace",
+            ]
+
+            if any(
+                keyword in request.message.lower()
+                for keyword in tool_keywords
+            ):
+                tools = await self.mcp.get_openai_tools()
+            else:
+                tools = []
+
             self.activity.add(
                 "Loaded MCP Tools",
                 str(len(tools)),
@@ -113,7 +139,7 @@ class AgentManager:
             self.activity.add(
                 "LLM Thinking",
                 provider.provider_name,
-)
+            )
             print("Calling OpenRouter...")
             print("Tools:", len(tools))
             print("Messages:", len(self.memory.get_history(agent.id)))
@@ -141,7 +167,7 @@ class AgentManager:
             self.activity.add(
                 "Response Generated",
                 agent.name,
-)
+            )
             return ChatResponse(
                 agent_id=context.selected_agent,
                 agent_name=agent.name,
@@ -150,5 +176,4 @@ class AgentManager:
             )
 
         finally:
-
-            await self.mcp.disconnect()
+            pass
